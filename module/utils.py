@@ -1,7 +1,11 @@
+import gi
 import glob
 import os.path
 import re
 import subprocess
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GdkPixbuf
 
 
 class RunTime():
@@ -130,6 +134,35 @@ class RunTime():
         )
         for file in res.stdout.decode("utf8").strip().split('\n'):
             filelist.append(file)
+
+
+# -----------------------------------------------------------------------------
+#  img
+#  Image Facility
+# -----------------------------------------------------------------------------
+class img(Gtk.Image):
+    IMG_FOLDER = "img/folder-128.png"
+    IMG_PLAY = "img/play-128.png"
+
+    def __init__(self):
+        Gtk.Image.__init__(self)
+
+    def get_image(self, image_name, size=24):
+        pixbuf = self.get_pixbuf(image_name, size)
+        return Gtk.Image.new_from_pixbuf(pixbuf)
+
+    def get_pixbuf(self, image_name, size=24):
+        name_file = self.get_file(image_name)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(name_file)
+        pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
+        return pixbuf
+
+    def get_file(self, image_name):
+        if image_name == "folder":
+            name_file = self.IMG_FOLDER
+        elif image_name == "play":
+            name_file = self.IMG_PLAY
+        return name_file
 
 # ---
 # END OF PROGRAM
