@@ -15,12 +15,12 @@ class DLLExplorer(Gtk.Window):
 
     def __init__(self):
         Gtk.Window.__init__(self, title='DLL Explorer')
-        self.set_default_size(800, 0)
+        self.set_default_size(800, 600)
 
         grid = Gtk.Grid(column_spacing=5)
         self.add(grid)
 
-        lab00 = Gtk.Label(label='app root (source)')
+        lab00 = Gtk.Label(label='Application root (source)')
         lab00.set_hexpand(False)
         lab00.set_halign(Gtk.Align.START)
         context = lab00.get_style_context()
@@ -33,7 +33,7 @@ class DLLExplorer(Gtk.Window):
         but04.add(utils.img().get_image('folder'))
         but04.connect('clicked', self.on_get_app_root_dir)
 
-        lab10 = Gtk.Label(label='pkg root (destination)')
+        lab10 = Gtk.Label(label='Package root (destination)')
         lab10.set_hexpand(False)
         lab10.set_halign(Gtk.Align.START)
         context = lab10.get_style_context()
@@ -53,6 +53,9 @@ class DLLExplorer(Gtk.Window):
         but14.add(utils.img().get_image('folder'))
         but14.connect('clicked', self.on_get_pkg_root_dir)
 
+        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        paned.set_vexpand(True)
+
         but_start = Gtk.Button(label='START')
         but_start.connect('clicked', self.on_start)
 
@@ -64,7 +67,45 @@ class DLLExplorer(Gtk.Window):
         grid.attach(lab12, 2, 1, 1, 1)
         grid.attach(self.ent13, 3, 1, 1, 1)
         grid.attach(but14, 4, 1, 1, 1)
-        grid.attach(but_start, 0, 2, 5, 1)
+        grid.attach(paned, 0, 2, 5, 1)
+        grid.attach(but_start, 0, 3, 5, 1)
+
+        # Trees
+        store1 = Gtk.TreeStore.new([str])
+        tree1 = Gtk.TreeView(model=store1)
+
+
+        cell1 = Gtk.CellRendererText()
+        column1 = Gtk.TreeViewColumn()
+        column1.pack_start(cell1, True)
+        column1.add_attribute(cell1, 'text', 0)
+        column1.set_title('Application (source)')
+        tree1.append_column(column1)
+
+        #root1 = store1.append(None, ['root'])
+        #child1 = store1.append(root1, ['child1'])
+        #store1.append(root1, ['child2'])
+        #store1.append(root1, ['child3'])
+        #store1.append(child1, ['gtranchild1'])
+
+        store2 = Gtk.TreeStore.new([str])
+        tree2 = Gtk.TreeView(model=store2)
+
+        cell2 = Gtk.CellRendererText()
+        column2 = Gtk.TreeViewColumn()
+        column2.pack_start(cell2, True)
+        column2.add_attribute(cell2, 'text', 0)
+        column2.set_title('Package (destination)')
+        tree2.append_column(column2)
+
+        #root2 = store2.append(None, ['root'])
+        #child2 = store2.append(root2, ['child1'])
+        #store2.append(root2, ['child2'])
+        #store2.append(root2, ['child3'])
+        #store2.append(child2, ['gtranchild1'])
+
+        paned.add1(tree1)
+        paned.add2(tree2)
 
     def on_start(self, button):
         print('START')
