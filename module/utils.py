@@ -13,21 +13,32 @@ from gi.repository import Gtk, GdkPixbuf
 #  directory tree
 # -----------------------------------------------------------------------------
 class DirTree():
-    tree = None
-    store = None
+    tree1 = None
+    tree2 = None
+    store1 = None
+    store2 = None
     dir_root = None
     app_root = None
     list_src = list()
 
-    def __init__(self, tree, store, dir):
-        self.tree = tree
-        self.store = store
-        self.dir_root = dir
+    def __init__(self, tree1, tree2, store1, store2):
+        self.tree1 = tree1
+        self.tree2 = tree2
+        self.store1 = store1
+        self.store2 = store2
 
-    def show(self):
-        root = self.store.append(None, [self.dir_root])
+    def show_app(self, dir):
+        # INITIALIZE
+        self.dir_root = dir
+        self.app_root = None
+        self.list_src = list()
+        iter = self.store1.get_iter_first()
+        if iter is not None:
+            self.store1.clear()
+
+        root = self.store1.append(None, [self.dir_root])
         top = self.dir_root
-        self.add_tree_node(root, top)
+        self.add_tree_iter(root, top)
 
         for file in self.list_src:
             if self.app_root is None:
@@ -46,7 +57,7 @@ class DirTree():
             print(file)
         print(self.app_root)
 
-    def add_tree_node(self, node_parent, dir_parent):
+    def add_tree_iter(self, iter_parent, dir_parent):
         list_obj = glob.glob(os.path.join(dir_parent, '*'))
 
         list_dir = list()
@@ -59,13 +70,13 @@ class DirTree():
 
         list_dir.sort()
         for dir in list_dir:
-            node = self.store.append(node_parent, [os.path.basename(dir)])
-            self.add_tree_node(node, dir)
+            iter = self.store1.append(iter_parent, [os.path.basename(dir)])
+            self.add_tree_iter(iter, dir)
 
         list_file.sort()
         for file in list_file:
-            node = self.store.append(node_parent, [os.path.basename(file)])
-            self.tree_node_expand(node)
+            iter = self.store1.append(iter_parent, [os.path.basename(file)])
+            self.tree_expand(iter)
             self.list_src.append(file)
 
     def compare_dir(self, dirA, dirB):
@@ -84,9 +95,9 @@ class DirTree():
             if len(dirC.split('/')) > 1:
                 self.compare_updir(dirC, dirD)
 
-    def tree_node_expand(self, node):
-        path = self.store.get_path(node)
-        self.tree.expand_to_path(path)
+    def tree_expand(self, iter):
+        path = self.store1.get_path(iter)
+        self.tree1.expand_to_path(path)
 
 
 # -----------------------------------------------------------------------------

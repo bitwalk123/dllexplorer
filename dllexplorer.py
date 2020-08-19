@@ -9,12 +9,15 @@ from module import utils
 
 class DLLExplorer(Gtk.Window):
     dir_target = '/home/bitwalk/test/usr/local/bin'
+    dirtree = None
+
     # CSS
     provider = Gtk.CssProvider()
     provider.load_from_path('./dllexplorer.css')
 
     def __init__(self):
         Gtk.Window.__init__(self, title='DLL Explorer')
+        self.set_border_width(2)
         self.set_default_size(800, 600)
 
         grid = Gtk.Grid(column_spacing=5)
@@ -82,14 +85,8 @@ class DLLExplorer(Gtk.Window):
         column1.set_title('Application (source)')
         self.tree1.append_column(column1)
 
-        #root1 = store1.append(None, ['root'])
-        #child1 = store1.append(root1, ['child1'])
-        #store1.append(root1, ['child2'])
-        #store1.append(root1, ['child3'])
-        #store1.append(child1, ['gtranchild1'])
-
         scrwin1 = Gtk.ScrolledWindow()
-        scrwin1.set_min_content_width(200)
+        scrwin1.set_min_content_width(300)
         scrwin1.set_policy(
             Gtk.PolicyType.AUTOMATIC,
             Gtk.PolicyType.AUTOMATIC
@@ -107,12 +104,6 @@ class DLLExplorer(Gtk.Window):
         column2.set_title('Package (destination)')
         self.tree2.append_column(column2)
 
-        #root2 = store2.append(None, ['root'])
-        #child2 = store2.append(root2, ['child1'])
-        #store2.append(root2, ['child2'])
-        #store2.append(root2, ['child3'])
-        #store2.append(child2, ['gtranchild1'])
-
         scrwin2 = Gtk.ScrolledWindow()
         scrwin2.set_policy(
             Gtk.PolicyType.AUTOMATIC,
@@ -121,29 +112,31 @@ class DLLExplorer(Gtk.Window):
         scrwin2.add(self.tree2)
         paned.add2(scrwin2)
 
+        self.dirtree = utils.DirTree(self.tree1, self.tree2, self.store1, self.store2)
+
     def on_start(self, button):
         print('START')
-        obj = utils.RunTime(self.dir_target)
-        obj.start()
+        #obj = utils.RunTime(self.dir_target)
+        #obj.start()
 
     def on_get_app_root_dir(self, widget):
-        dir = self.on_get_dir()
+        dir = self.on_get_dir_dlg()
         if dir is None:
             return
 
         self.ent01.set_text(dir)
         self.ent13.set_text(os.path.basename(dir))
-        dirtree = utils.DirTree(self.tree1, self.store1, dir)
-        dirtree.show()
+
+        self.dirtree.show_app(dir)
 
     def on_get_pkg_root_dir(self, widget):
-        dir = self.on_get_dir()
+        dir = self.on_get_dir_dlg()
         if dir is None:
             return
 
         self.ent11.set_text(dir)
 
-    def on_get_dir(self):
+    def on_get_dir_dlg(self):
         dir = None
 
         dialog = Gtk.FileChooserDialog(title="Select folder",
