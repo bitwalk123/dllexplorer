@@ -19,6 +19,7 @@ class DirTree():
     store2 = None
     dir_root = None
     app_root = None
+    pkg_root = None
     list_src = list()
 
     def __init__(self, tree1, tree2, store1, store2):
@@ -59,6 +60,14 @@ class DirTree():
 
             print(file)
         print(self.app_root)
+
+    # -------------------------------------------------------------------------
+    #  show_app
+    # -------------------------------------------------------------------------
+    def show_pkg(self, dir):
+        self.pkg_root = dir
+
+        root = self.store2.append(None, [self.pkg_root])
 
     # -------------------------------------------------------------------------
     #  add_tree_iter

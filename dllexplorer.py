@@ -143,6 +143,7 @@ class DLLExplorer(Gtk.Window):
             return
 
         self.ent11.set_text(dir)
+        self.dirtree.show_pkg(os.path.join(dir, self.ent13.get_text()))
 
     # -------------------------------------------------------------------------
     #  on_get_dir_dlg
