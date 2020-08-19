@@ -16,6 +16,8 @@ class DirTree():
     tree = None
     store = None
     dir_root = None
+    app_root = None
+    list_src = list()
 
     def __init__(self, tree, store, dir):
         self.tree = tree
@@ -26,6 +28,23 @@ class DirTree():
         root = self.store.append(None, [self.dir_root])
         top = self.dir_root
         self.add_tree_node(root, top)
+
+        for file in self.list_src:
+            if self.app_root is None:
+                self.app_root = os.path.dirname(file)
+            else:
+                dir1 = self.app_root
+                dir2 = os.path.dirname(file)
+
+                while len(dir1.split('/')) > len(dir2.split('/')):
+                    dir1 = os.path.dirname(dir1)
+                while len(dir1.split('/')) < len(dir2.split('/')):
+                    dir2 = os.path.dirname(dir2)
+
+                self.compare_dir(dir1, dir2)
+
+            print(file)
+        print(self.app_root)
 
     def add_tree_node(self, node_parent, dir_parent):
         list_obj = glob.glob(os.path.join(dir_parent, '*'))
@@ -45,12 +64,30 @@ class DirTree():
 
         list_file.sort()
         for file in list_file:
-            node=self.store.append(node_parent, [os.path.basename(file)])
+            node = self.store.append(node_parent, [os.path.basename(file)])
             self.tree_node_expand(node)
+            self.list_src.append(file)
+
+    def compare_dir(self, dirA, dirB):
+        if dirA != dirB:
+            if len(dirA) > 1:
+                self.compare_updir(dirA, dirB)
+            else:
+                print('Error!')
+
+    def compare_updir(self, dirA, dirB):
+        dirC = os.path.dirname(dirA)
+        dirD = os.path.dirname(dirB)
+        if dirC == dirD:
+            self.app_root = dirC
+        else:
+            if len(dirC.split('/')) > 1:
+                self.compare_updir(dirC, dirD)
 
     def tree_node_expand(self, node):
         path = self.store.get_path(node)
         self.tree.expand_to_path(path)
+
 
 # -----------------------------------------------------------------------------
 #  img
