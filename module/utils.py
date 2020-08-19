@@ -27,6 +27,9 @@ class DirTree():
         self.store1 = store1
         self.store2 = store2
 
+    # -------------------------------------------------------------------------
+    #  show_app
+    # -------------------------------------------------------------------------
     def show_app(self, dir):
         # INITIALIZE
         self.dir_root = dir
@@ -57,6 +60,9 @@ class DirTree():
             print(file)
         print(self.app_root)
 
+    # -------------------------------------------------------------------------
+    #  add_tree_iter
+    # -------------------------------------------------------------------------
     def add_tree_iter(self, iter_parent, dir_parent):
         list_obj = glob.glob(os.path.join(dir_parent, '*'))
 
@@ -79,6 +85,9 @@ class DirTree():
             self.tree_expand(iter)
             self.list_src.append(file)
 
+    # -------------------------------------------------------------------------
+    #  compare_dir
+    # -------------------------------------------------------------------------
     def compare_dir(self, dirA, dirB):
         if dirA != dirB:
             if len(dirA) > 1:
@@ -86,6 +95,9 @@ class DirTree():
             else:
                 print('Error!')
 
+    # -------------------------------------------------------------------------
+    #  compare_updir
+    # -------------------------------------------------------------------------
     def compare_updir(self, dirA, dirB):
         dirC = os.path.dirname(dirA)
         dirD = os.path.dirname(dirB)
@@ -95,6 +107,9 @@ class DirTree():
             if len(dirC.split('/')) > 1:
                 self.compare_updir(dirC, dirD)
 
+    # -------------------------------------------------------------------------
+    #  tree_expand
+    # -------------------------------------------------------------------------
     def tree_expand(self, iter):
         path = self.store1.get_path(iter)
         self.tree1.expand_to_path(path)
@@ -111,16 +126,25 @@ class img(Gtk.Image):
     def __init__(self):
         Gtk.Image.__init__(self)
 
+    # -------------------------------------------------------------------------
+    #  get_image
+    # -------------------------------------------------------------------------
     def get_image(self, image_name, size=24):
         pixbuf = self.get_pixbuf(image_name, size)
         return Gtk.Image.new_from_pixbuf(pixbuf)
 
+    # -------------------------------------------------------------------------
+    #  get_pixbuf
+    # -------------------------------------------------------------------------
     def get_pixbuf(self, image_name, size=24):
         name_file = self.get_file(image_name)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(name_file)
         pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
         return pixbuf
 
+    # -------------------------------------------------------------------------
+    #  get_file
+    # -------------------------------------------------------------------------
     def get_file(self, image_name):
         if image_name == "folder":
             name_file = self.IMG_FOLDER

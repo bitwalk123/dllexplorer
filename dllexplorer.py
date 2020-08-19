@@ -77,7 +77,6 @@ class DLLExplorer(Gtk.Window):
         self.store1 = Gtk.TreeStore.new([str])
         self.tree1 = Gtk.TreeView(model=self.store1)
 
-
         cell1 = Gtk.CellRendererText()
         column1 = Gtk.TreeViewColumn()
         column1.pack_start(cell1, True)
@@ -114,11 +113,17 @@ class DLLExplorer(Gtk.Window):
 
         self.dirtree = utils.DirTree(self.tree1, self.tree2, self.store1, self.store2)
 
+    # -------------------------------------------------------------------------
+    #  on_start
+    # -------------------------------------------------------------------------
     def on_start(self, button):
         print('START')
-        #obj = utils.RunTime(self.dir_target)
-        #obj.start()
+        # obj = utils.RunTime(self.dir_target)
+        # obj.start()
 
+    # -------------------------------------------------------------------------
+    #  on_get_app_root_dir
+    # -------------------------------------------------------------------------
     def on_get_app_root_dir(self, widget):
         dir = self.on_get_dir_dlg()
         if dir is None:
@@ -129,6 +134,9 @@ class DLLExplorer(Gtk.Window):
 
         self.dirtree.show_app(dir)
 
+    # -------------------------------------------------------------------------
+    #  on_get_pkg_root_dir
+    # -------------------------------------------------------------------------
     def on_get_pkg_root_dir(self, widget):
         dir = self.on_get_dir_dlg()
         if dir is None:
@@ -136,6 +144,9 @@ class DLLExplorer(Gtk.Window):
 
         self.ent11.set_text(dir)
 
+    # -------------------------------------------------------------------------
+    #  on_get_dir_dlg
+    # -------------------------------------------------------------------------
     def on_get_dir_dlg(self):
         dir = None
 
@@ -153,6 +164,7 @@ class DLLExplorer(Gtk.Window):
 
         dialog.destroy()
         return dir
+
 
 # -----------------------------------------------------------------------------
 #  MAIN
