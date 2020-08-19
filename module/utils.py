@@ -8,6 +8,83 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf
 
 
+# -----------------------------------------------------------------------------
+#  DirTree
+#  directory tree
+# -----------------------------------------------------------------------------
+class DirTree():
+    tree = None
+    store = None
+    dir_root = None
+
+    def __init__(self, tree, store, dir):
+        self.tree = tree
+        self.store = store
+        self.dir_root = dir
+
+    def show(self):
+        root = self.store.append(None, [self.dir_root])
+        top = self.dir_root
+        self.add_tree_node(root, top)
+
+    def add_tree_node(self, node_parent, dir_parent):
+        list_obj = glob.glob(os.path.join(dir_parent, '*'))
+
+        list_dir = list()
+        list_file = list()
+        for obj in list_obj:
+            if os.path.isdir(obj):
+                list_dir.append(obj)
+            if os.path.isfile(obj):
+                list_file.append(obj)
+
+        list_dir.sort()
+        for dir in list_dir:
+            node = self.store.append(node_parent, [os.path.basename(dir)])
+            self.add_tree_node(node, dir)
+
+        list_file.sort()
+        for file in list_file:
+            node=self.store.append(node_parent, [os.path.basename(file)])
+            self.tree_node_expand(node)
+
+    def tree_node_expand(self, node):
+        path = self.store.get_path(node)
+        self.tree.expand_to_path(path)
+
+# -----------------------------------------------------------------------------
+#  img
+#  Image Facility
+# -----------------------------------------------------------------------------
+class img(Gtk.Image):
+    IMG_FOLDER = "img/folder-128.png"
+    IMG_PLAY = "img/play-128.png"
+
+    def __init__(self):
+        Gtk.Image.__init__(self)
+
+    def get_image(self, image_name, size=24):
+        pixbuf = self.get_pixbuf(image_name, size)
+        return Gtk.Image.new_from_pixbuf(pixbuf)
+
+    def get_pixbuf(self, image_name, size=24):
+        name_file = self.get_file(image_name)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(name_file)
+        pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
+        return pixbuf
+
+    def get_file(self, image_name):
+        if image_name == "folder":
+            name_file = self.IMG_FOLDER
+        elif image_name == "play":
+            name_file = self.IMG_PLAY
+        return name_file
+
+
+# -----------------------------------------------------------------------------
+#  RunTime
+#  run time dll search
+# -----------------------------------------------------------------------------
 class RunTime():
     dir_target = None
     objdump = '/usr/bin/x86_64-w64-mingw32-objdump'
@@ -134,35 +211,6 @@ class RunTime():
         )
         for file in res.stdout.decode("utf8").strip().split('\n'):
             filelist.append(file)
-
-
-# -----------------------------------------------------------------------------
-#  img
-#  Image Facility
-# -----------------------------------------------------------------------------
-class img(Gtk.Image):
-    IMG_FOLDER = "img/folder-128.png"
-    IMG_PLAY = "img/play-128.png"
-
-    def __init__(self):
-        Gtk.Image.__init__(self)
-
-    def get_image(self, image_name, size=24):
-        pixbuf = self.get_pixbuf(image_name, size)
-        return Gtk.Image.new_from_pixbuf(pixbuf)
-
-    def get_pixbuf(self, image_name, size=24):
-        name_file = self.get_file(image_name)
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(name_file)
-        pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
-        return pixbuf
-
-    def get_file(self, image_name):
-        if image_name == "folder":
-            name_file = self.IMG_FOLDER
-        elif image_name == "play":
-            name_file = self.IMG_PLAY
-        return name_file
 
 # ---
 # END OF PROGRAM

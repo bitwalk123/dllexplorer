@@ -71,8 +71,8 @@ class DLLExplorer(Gtk.Window):
         grid.attach(but_start, 0, 3, 5, 1)
 
         # Trees
-        store1 = Gtk.TreeStore.new([str])
-        tree1 = Gtk.TreeView(model=store1)
+        self.store1 = Gtk.TreeStore.new([str])
+        self.tree1 = Gtk.TreeView(model=self.store1)
 
 
         cell1 = Gtk.CellRendererText()
@@ -80,7 +80,7 @@ class DLLExplorer(Gtk.Window):
         column1.pack_start(cell1, True)
         column1.add_attribute(cell1, 'text', 0)
         column1.set_title('Application (source)')
-        tree1.append_column(column1)
+        self.tree1.append_column(column1)
 
         #root1 = store1.append(None, ['root'])
         #child1 = store1.append(root1, ['child1'])
@@ -88,15 +88,24 @@ class DLLExplorer(Gtk.Window):
         #store1.append(root1, ['child3'])
         #store1.append(child1, ['gtranchild1'])
 
-        store2 = Gtk.TreeStore.new([str])
-        tree2 = Gtk.TreeView(model=store2)
+        scrwin1 = Gtk.ScrolledWindow()
+        scrwin1.set_min_content_width(200)
+        scrwin1.set_policy(
+            Gtk.PolicyType.AUTOMATIC,
+            Gtk.PolicyType.AUTOMATIC
+        )
+        scrwin1.add(self.tree1)
+        paned.add1(scrwin1)
+
+        self.store2 = Gtk.TreeStore.new([str])
+        self.tree2 = Gtk.TreeView(model=self.store2)
 
         cell2 = Gtk.CellRendererText()
         column2 = Gtk.TreeViewColumn()
         column2.pack_start(cell2, True)
         column2.add_attribute(cell2, 'text', 0)
         column2.set_title('Package (destination)')
-        tree2.append_column(column2)
+        self.tree2.append_column(column2)
 
         #root2 = store2.append(None, ['root'])
         #child2 = store2.append(root2, ['child1'])
@@ -104,8 +113,13 @@ class DLLExplorer(Gtk.Window):
         #store2.append(root2, ['child3'])
         #store2.append(child2, ['gtranchild1'])
 
-        paned.add1(tree1)
-        paned.add2(tree2)
+        scrwin2 = Gtk.ScrolledWindow()
+        scrwin2.set_policy(
+            Gtk.PolicyType.AUTOMATIC,
+            Gtk.PolicyType.AUTOMATIC
+        )
+        scrwin2.add(self.tree2)
+        paned.add2(scrwin2)
 
     def on_start(self, button):
         print('START')
@@ -114,14 +128,20 @@ class DLLExplorer(Gtk.Window):
 
     def on_get_app_root_dir(self, widget):
         dir = self.on_get_dir()
-        if dir is not None:
-            self.ent01.set_text(dir)
-            self.ent13.set_text(os.path.basename(dir))
+        if dir is None:
+            return
+
+        self.ent01.set_text(dir)
+        self.ent13.set_text(os.path.basename(dir))
+        dirtree = utils.DirTree(self.tree1, self.store1, dir)
+        dirtree.show()
 
     def on_get_pkg_root_dir(self, widget):
         dir = self.on_get_dir()
-        if dir is not None:
-            self.ent11.set_text(dir)
+        if dir is None:
+            return
+
+        self.ent11.set_text(dir)
 
     def on_get_dir(self):
         dir = None
@@ -140,7 +160,6 @@ class DLLExplorer(Gtk.Window):
 
         dialog.destroy()
         return dir
-
 
 # -----------------------------------------------------------------------------
 #  MAIN
