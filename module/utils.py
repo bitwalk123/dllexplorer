@@ -1,18 +1,32 @@
 import gi
 import glob
+import os
 import os.path
 import re
+import shutil
 import subprocess
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf
 
+# =============================================================================
+#  file_copy
+#
+#  arguments:
+#    src - source file in full path
+#    dst - destinate file in full path
+# =============================================================================
+def file_copy(src, dst):
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    shutil.copy2(src, dst)
 
 # -----------------------------------------------------------------------------
 #  DirTree
 #  directory tree
 # -----------------------------------------------------------------------------
 class DirTree():
+    root1 = None
+    root2 = None
     tree1 = None
     tree2 = None
     store1 = None
@@ -29,6 +43,29 @@ class DirTree():
         self.store2 = store2
 
     # -------------------------------------------------------------------------
+    #  copy
+    # -------------------------------------------------------------------------
+    def copy(self):
+        regex1 = self.app_root + '/(.*)'
+        pattern1 = re.compile(regex1)
+        for file in self.list_src:
+            # BUILT files
+            match1 = pattern1.match(file)
+            if match1:
+                file_dst = match1.group(1)
+                file_dst = os.path.join(self.pkg_root, file_dst)
+                print(file_dst)
+                file_copy(file, file_dst)
+            else:
+                print('Error!')
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #  display file tree at destination pane (left)
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        self.add_tree_iter(self.tree2, self.store2, self.root2, self.pkg_root)
+
+
+    # -------------------------------------------------------------------------
     #  show_app
     # -------------------------------------------------------------------------
     def show_app(self, dir):
@@ -40,9 +77,12 @@ class DirTree():
         if iter is not None:
             self.store1.clear()
 
-        root = self.store1.append(None, [self.dir_root])
-        top = self.dir_root
-        self.add_tree_iter(root, top)
+        self.root1 = self.store1.append(None, [self.dir_root])
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #  display file tree at source pane (right)
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        self.add_tree_iter(self.tree1, self.store1, self.root1, self.dir_root)
 
         for file in self.list_src:
             if self.app_root is None:
@@ -58,8 +98,8 @@ class DirTree():
 
                 self.compare_dir(dir1, dir2)
 
-            print(file)
-        print(self.app_root)
+            #print(file)
+        #print(self.app_root)
 
     # -------------------------------------------------------------------------
     #  show_app
@@ -67,12 +107,12 @@ class DirTree():
     def show_pkg(self, dir):
         self.pkg_root = dir
 
-        root = self.store2.append(None, [self.pkg_root])
+        self.root2 = self.store2.append(None, [self.pkg_root])
 
     # -------------------------------------------------------------------------
     #  add_tree_iter
     # -------------------------------------------------------------------------
-    def add_tree_iter(self, iter_parent, dir_parent):
+    def add_tree_iter(self, tree, store, iter_parent, dir_parent):
         list_obj = glob.glob(os.path.join(dir_parent, '*'))
 
         list_dir = list()
@@ -85,13 +125,13 @@ class DirTree():
 
         list_dir.sort()
         for dir in list_dir:
-            iter = self.store1.append(iter_parent, [os.path.basename(dir)])
-            self.add_tree_iter(iter, dir)
+            iter = store.append(iter_parent, [os.path.basename(dir)])
+            self.add_tree_iter(tree, store, iter, dir)
 
         list_file.sort()
         for file in list_file:
-            iter = self.store1.append(iter_parent, [os.path.basename(file)])
-            self.tree_expand(iter)
+            iter = store.append(iter_parent, [os.path.basename(file)])
+            self.tree_expand(tree, store, iter)
             self.list_src.append(file)
 
     # -------------------------------------------------------------------------
@@ -119,9 +159,9 @@ class DirTree():
     # -------------------------------------------------------------------------
     #  tree_expand
     # -------------------------------------------------------------------------
-    def tree_expand(self, iter):
-        path = self.store1.get_path(iter)
-        self.tree1.expand_to_path(path)
+    def tree_expand(self, tree, store, iter):
+        path = store.get_path(iter)
+        tree.expand_to_path(path)
 
 
 # -----------------------------------------------------------------------------

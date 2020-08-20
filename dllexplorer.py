@@ -118,6 +118,7 @@ class DLLExplorer(Gtk.Window):
     # -------------------------------------------------------------------------
     def on_start(self, button):
         print('START')
+        self.dirtree.copy()
         # obj = utils.RunTime(self.dir_target)
         # obj.start()
 
@@ -143,7 +144,8 @@ class DLLExplorer(Gtk.Window):
             return
 
         self.ent11.set_text(dir)
-        self.dirtree.show_pkg(os.path.join(dir, self.ent13.get_text()))
+        dir_pkg = os.path.join(dir, self.ent13.get_text())
+        self.dirtree.show_pkg(dir_pkg)
 
     # -------------------------------------------------------------------------
     #  on_get_dir_dlg
