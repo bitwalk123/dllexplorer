@@ -119,8 +119,6 @@ class DLLExplorer(Gtk.Window):
     def on_start(self, button):
         print('START')
         self.dirtree.copy()
-        # obj = utils.RunTime(self.dir_target)
-        # obj.start()
 
     # -------------------------------------------------------------------------
     #  on_get_app_root_dir

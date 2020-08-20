@@ -59,6 +59,40 @@ class DirTree():
             else:
                 print('Error!')
 
+        # Runtime check
+        runtime = RunTime(os.path.join(self.app_root, 'bin'))
+        runtime.start()
+
+        regex2 = runtime.get_mingw64_topdir() + '/(.*)'
+        pattern2 = re.compile(regex2)
+
+        regex3 = '/usr/(.*)'
+        pattern3 = re.compile(regex3)
+
+        regex4 = '/usr/share/(.*)'
+        pattern4 = re.compile(regex4)
+
+        for file in runtime.list_file:
+            match2 = pattern2.match(file)
+            if match2:
+                file_dst = match2.group(1)
+                file_dst = os.path.join(self.pkg_root, file_dst)
+                print(file_dst)
+                file_copy(file, file_dst)
+            else:
+                match3 = pattern3.match(file)
+                if match3:
+                    # only copy /usr/share/*.
+                    # others are igonored without error
+                    match4 = pattern4.match(file)
+                    if match4:
+                        file_dst = match4.group(1)
+                        file_dst = os.path.join(self.pkg_root, file_dst)
+                        print(file_dst)
+                        file_copy(file, file_dst)
+                else:
+                    print('Error!')
+
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         #  display file tree at destination pane (left)
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -331,7 +365,20 @@ class RunTime():
             stderr=subprocess.PIPE
         )
         for file in res.stdout.decode("utf8").strip().split('\n'):
-            filelist.append(file)
+            if os.path.isfile(file):
+                filelist.append(file)
 
+    # -------------------------------------------------------------------------
+    #  get_mingw64_topdir - get top directory of MinGW64 system
+    #
+    #  argument
+    #    (none)
+    #
+    #  return
+    #    (none)
+    # -------------------------------------------------------------------------
+    def get_mingw64_topdir(self):
+        # retern after aliminating 'bin'
+        return(os.path.dirname(self.dir_mingw64))
 # ---
 # END OF PROGRAM
