@@ -243,8 +243,12 @@ class img(Gtk.Image):
 class RunTime():
     dir_target = None
     objdump = '/usr/bin/x86_64-w64-mingw32-objdump'
-    dir_mingw64 = '/usr/x86_64-w64-mingw32/sys-root/mingw/bin'
-    pattern = re.compile(r'\s*DLL\sName:\s(.*\.dll)')
+    dir_mingw64 = '/usr/x86_64-w64-mingw32/sys-root/mingw'
+    bin_mingw64 = os.path.join(dir_mingw64, 'bin')
+    include_mingw64 = os.path.join(dir_mingw64, 'include')
+    pattern1 = re.compile(r'\s*DLL\sName:\s(.*\.dll)')
+    pattern2 = re.compile(bin_mingw64)
+    pattern3 = re.compile(include_mingw64)
     list_dll = list()
     list_dll_NA = list()
     list_rpm = list()
@@ -263,7 +267,7 @@ class RunTime():
         # get relevant runtime DLLs
         for file_bin in list_file_bin:
             print(file_bin)
-            self.get_DLLs(file_bin, self.list_dll, self.list_dll_NA, self.dir_mingw64)
+            self.get_DLLs(file_bin, self.list_dll, self.list_dll_NA, self.bin_mingw64)
 
         # set unique DLLs
         self.list_dll = list(set(self.list_dll))
@@ -271,7 +275,8 @@ class RunTime():
         self.list_dll_NA.sort()
         # get RPM package contains specified DLL
         for dll in self.list_dll:
-            dll_full = os.path.join(self.dir_mingw64, dll)
+            dll_full = os.path.join(self.bin_mingw64, dll)
+            self.list_file.append(dll_full)
             self.get_RPM(dll_full, self.list_rpm)
 
         # set unique RPMs
@@ -293,8 +298,8 @@ class RunTime():
 
         print(len(self.list_file))
 
-        for dll in self.list_dll_NA:
-            print(dll)
+        #for dll in self.list_dll_NA:
+        #    print(dll)
 
     # -------------------------------------------------------------------------
     #  get_DLLs - get related DLLs recursively
@@ -315,7 +320,7 @@ class RunTime():
             stderr=subprocess.PIPE
         )
         for line in res.stdout.decode("utf8").strip().split('\n'):
-            match = self.pattern.match(line)
+            match = self.pattern1.match(line)
             if match:
                 dll = match.group(1)
                 dll_full = os.path.join(dir, dll)
@@ -366,7 +371,11 @@ class RunTime():
         )
         for file in res.stdout.decode("utf8").strip().split('\n'):
             if os.path.isfile(file):
-                filelist.append(file)
+                match2 = self.pattern2.match(file)
+                if not match2:
+                    match3 = self.pattern3.match(file)
+                    if not match3:
+                        filelist.append(file)
 
     # -------------------------------------------------------------------------
     #  get_mingw64_topdir - get top directory of MinGW64 system
@@ -379,6 +388,6 @@ class RunTime():
     # -------------------------------------------------------------------------
     def get_mingw64_topdir(self):
         # retern after aliminating 'bin'
-        return(os.path.dirname(self.dir_mingw64))
+        return(self.dir_mingw64)
 # ---
 # END OF PROGRAM
