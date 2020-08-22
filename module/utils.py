@@ -89,7 +89,7 @@ class DirTree():
                     match4 = pattern4.match(file)
                     if match4:
                         file_dst = match4.group(1)
-                        file_dst = os.path.join(self.pkg_root, file_dst)
+                        file_dst = os.path.join(self.pkg_root, "share", file_dst)
                         print(file_dst)
                         file_copy(file, file_dst)
                 else:
