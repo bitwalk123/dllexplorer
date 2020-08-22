@@ -9,6 +9,7 @@ import subprocess
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf
 
+
 # =============================================================================
 #  file_copy
 #
@@ -19,6 +20,7 @@ from gi.repository import Gtk, GdkPixbuf
 def file_copy(src, dst):
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     shutil.copy2(src, dst)
+
 
 # -----------------------------------------------------------------------------
 #  DirTree
@@ -98,7 +100,6 @@ class DirTree():
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         self.add_tree_iter(self.tree2, self.store2, self.root2, self.pkg_root)
 
-
     # -------------------------------------------------------------------------
     #  show_app
     # -------------------------------------------------------------------------
@@ -132,8 +133,8 @@ class DirTree():
 
                 self.compare_dir(dir1, dir2)
 
-            #print(file)
-        #print(self.app_root)
+            # print(file)
+        # print(self.app_root)
 
     # -------------------------------------------------------------------------
     #  show_app
@@ -199,44 +200,6 @@ class DirTree():
 
 
 # -----------------------------------------------------------------------------
-#  img
-#  Image Facility
-# -----------------------------------------------------------------------------
-class img(Gtk.Image):
-    IMG_FOLDER = "img/folder-128.png"
-    IMG_PLAY = "img/play-128.png"
-
-    def __init__(self):
-        Gtk.Image.__init__(self)
-
-    # -------------------------------------------------------------------------
-    #  get_image
-    # -------------------------------------------------------------------------
-    def get_image(self, image_name, size=24):
-        pixbuf = self.get_pixbuf(image_name, size)
-        return Gtk.Image.new_from_pixbuf(pixbuf)
-
-    # -------------------------------------------------------------------------
-    #  get_pixbuf
-    # -------------------------------------------------------------------------
-    def get_pixbuf(self, image_name, size=24):
-        name_file = self.get_file(image_name)
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(name_file)
-        pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
-        return pixbuf
-
-    # -------------------------------------------------------------------------
-    #  get_file
-    # -------------------------------------------------------------------------
-    def get_file(self, image_name):
-        if image_name == "folder":
-            name_file = self.IMG_FOLDER
-        elif image_name == "play":
-            name_file = self.IMG_PLAY
-        return name_file
-
-
-# -----------------------------------------------------------------------------
 #  RunTime
 #  run time dll search
 # -----------------------------------------------------------------------------
@@ -249,10 +212,13 @@ class RunTime():
     pattern1 = re.compile(r'\s*DLL\sName:\s(.*\.dll)')
     pattern2 = re.compile(bin_mingw64)
     pattern3 = re.compile(include_mingw64)
+    pattern4 = re.compile(r'^/usr/share/man/')
     list_dll = list()
     list_dll_NA = list()
     list_rpm = list()
     list_file = list()
+    # default theme of GNOME used in window decoration
+    rpm_theme = 'adwaita-icon-theme'
 
     # CONSTRUCTOR
     def __init__(self, dir):
@@ -279,6 +245,8 @@ class RunTime():
             self.list_file.append(dll_full)
             self.get_RPM(dll_full, self.list_rpm)
 
+        # add icon theme used for window decoration
+        self.list_rpm.append(self.rpm_theme)
         # set unique RPMs
         self.list_rpm = list(set(self.list_rpm))
         # sort list of RPMs
@@ -298,7 +266,7 @@ class RunTime():
 
         print(len(self.list_file))
 
-        #for dll in self.list_dll_NA:
+        # for dll in self.list_dll_NA:
         #    print(dll)
 
     # -------------------------------------------------------------------------
@@ -371,11 +339,23 @@ class RunTime():
         )
         for file in res.stdout.decode("utf8").strip().split('\n'):
             if os.path.isfile(file):
+
+                # /usr/x86_64-w64-mingw32/sys-root/mingw/bin
                 match2 = self.pattern2.match(file)
-                if not match2:
-                    match3 = self.pattern3.match(file)
-                    if not match3:
-                        filelist.append(file)
+                if match2:
+                    continue
+
+                # /usr/x86_64-w64-mingw32/sys-root/mingw/include
+                match3 = self.pattern3.match(file)
+                if match3:
+                    continue
+
+                # /usr/share/man/
+                match4 = self.pattern4.match(file)
+                if match4:
+                    continue
+
+                filelist.append(file)
 
     # -------------------------------------------------------------------------
     #  get_mingw64_topdir - get top directory of MinGW64 system
@@ -388,6 +368,45 @@ class RunTime():
     # -------------------------------------------------------------------------
     def get_mingw64_topdir(self):
         # retern after aliminating 'bin'
-        return(self.dir_mingw64)
+        return (self.dir_mingw64)
+
+
+# -----------------------------------------------------------------------------
+#  img
+#  Image Facility
+# -----------------------------------------------------------------------------
+class img(Gtk.Image):
+    IMG_FOLDER = "img/folder-128.png"
+    IMG_PLAY = "img/play-128.png"
+
+    def __init__(self):
+        Gtk.Image.__init__(self)
+
+    # -------------------------------------------------------------------------
+    #  get_image
+    # -------------------------------------------------------------------------
+    def get_image(self, image_name, size=24):
+        pixbuf = self.get_pixbuf(image_name, size)
+        return Gtk.Image.new_from_pixbuf(pixbuf)
+
+    # -------------------------------------------------------------------------
+    #  get_pixbuf
+    # -------------------------------------------------------------------------
+    def get_pixbuf(self, image_name, size=24):
+        name_file = self.get_file(image_name)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(name_file)
+        pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
+        return pixbuf
+
+    # -------------------------------------------------------------------------
+    #  get_file
+    # -------------------------------------------------------------------------
+    def get_file(self, image_name):
+        if image_name == "folder":
+            name_file = self.IMG_FOLDER
+        elif image_name == "play":
+            name_file = self.IMG_PLAY
+        return name_file
+
 # ---
 # END OF PROGRAM
